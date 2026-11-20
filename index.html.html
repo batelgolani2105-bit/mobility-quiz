@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שאלון הערכת ניידות למילוי עצמי</title>
+    <!-- טעינת Tailwind CSS לעיצוב רספונסיבי ונקי -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- טעינת גופן Heebo / Assistant מותאם לעברית ולקריאות גבוהה -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        /* אנימציות עדינות למעבר בין מסכים */
+        .fade-in {
+            animation: fadeIn 0.35s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* הבהוב עדין לאור הפעיל ברמזור */
+        .pulse-glow {
+            animation: pulseGlow 2s infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+    </style>
+</head>
+<body id="app-body" class="bg-slate-100 text-slate-900 min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-500">
+
+    <!-- מיכל ראשי בפרופורציית כרטיסייה למסכים ניידים -->
+    <main id="app-container" class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden flex flex-col justify-between min-h-[82vh] p-6 sm:p-8 transition-all duration-300">
+        
+        <!-- ==================== מסך פתיחה ==================== -->
+        <section id="welcome-screen" class="flex flex-col items-center justify-between h-full flex-grow text-center fade-in py-2">
+            <div class="w-full">
+                <span class="inline-block bg-blue-100 text-blue-800 text-base font-bold px-4 py-1.5 rounded-full mb-4">
+                    בטיחות המטופל באשפוז
+                </span>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight mb-4">
+                    שאלון הערכת ניידות למילוי עצמי
+                </h1>
+                <p class="text-xl sm:text-2xl text-slate-700 font-medium leading-relaxed">
+                    רוצה לבדוק האם וכיצד אפשר להסתובב במהלך האשפוז היום? בוא/י נתחיל!
+                </p>
+            </div>
+
+            <!-- איור SVG מותאם של רמזור עם 3 צבעים -->
+            <div class="my-6 flex justify-center items-center" aria-hidden="true">
+                <svg width="110" height="230" viewBox="0 0 110 230" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-lg">
+                    <!-- גוף הרמזור -->
+                    <rect x="15" y="10" width="80" height="195" rx="24" fill="#1E293B" stroke="#0F172A" stroke-width="4"/>
+                    <!-- עמוד הרמזור -->
+                    <rect x="47" y="205" width="16" height="25" rx="4" fill="#334155"/>
+                    <!-- הצללות פנימיות לעיגולים -->
+                    <circle cx="55" cy="48" r="23" fill="#0F172A"/>
+                    <circle cx="55" cy="107" r="23" fill="#0F172A"/>
+                    <circle cx="55" cy="166" r="23" fill="#0F172A"/>
+                    <!-- אור אדום -->
+                    <circle cx="55" cy="48" r="19" fill="#EF4444" class="pulse-glow"/>
+                    <path d="M43 40C46 35 52 33 58 34" stroke="#FCA5A5" stroke-width="3" stroke-linecap="round"/>
+                    <!-- אור צהוב -->
+                    <circle cx="55" cy="107" r="19" fill="#FACC15" class="pulse-glow" style="animation-delay: 0.6s;"/>
+                    <path d="M43 99C46 94 52 92 58 93" stroke="#FEF08A" stroke-width="3" stroke-linecap="round"/>
+                    <!-- אור ירוק -->
+                    <circle cx="55" cy="166" r="19" fill="#22C55E" class="pulse-glow" style="animation-delay: 1.2s;"/>
+                    <path d="M43 158C46 153 52 151 58 152" stroke="#86EFAC" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+            </div>
+
+            <!-- כפתור התחלה גדול ונגיש -->
+            <div class="w-full pt-2">
+                <button onclick="startQuiz()" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-2xl font-bold py-5 px-6 rounded-2xl shadow-lg shadow-blue-600/30 transition-transform active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                    התחלת המענה על השאלון
+                </button>
+            </div>
+        </section>
+
+        <!-- ==================== מסך שאלון ==================== -->
+        <section id="quiz-screen" class="hidden flex-col justify-between h-full flex-grow fade-in">
+            <!-- כותרת עליונה ופס התקדמות -->
+            <div class="w-full">
+                <div class="flex justify-between items-center mb-3">
+                    <span id="part-badge" class="bg-indigo-100 text-indigo-900 text-lg font-extrabold px-4 py-1.5 rounded-xl">
+                        חלק א'
+                    </span>
+                    <span id="question-counter" class="text-lg font-bold text-slate-600">
+                        שאלה 1 מתוך 7
+                    </span>
+                </div>
+                <!-- פס התקדמות -->
+                <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden mb-6">
+                    <div id="progress-bar" class="bg-blue-600 h-full rounded-full transition-all duration-300" style="width: 14%;"></div>
+                </div>
+            </div>
+
+            <!-- כרטיסיית השאלה -->
+            <div class="bg-slate-50 border-2 border-slate-200 rounded-3xl p-6 my-auto shadow-inner flex items-center justify-center min-h-[220px]">
+                <h2 id="question-text" class="text-2xl sm:text-3xl font-bold text-slate-900 text-center leading-snug">
+                    טוען שאלה...
+                </h2>
+            </div>
+
+            <!-- כפתורי מענה גדולים (כן / לא) -->
+            <div class="w-full mt-8 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="handleAnswer(true)" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-3xl font-extrabold py-6 rounded-2xl shadow-md transition-transform active:scale-95 focus:outline-none focus:ring-4 focus:ring-emerald-300 flex flex-col items-center justify-center gap-1">
+                        <span>כן</span>
+                    </button>
+                    <button onclick="handleAnswer(false)" class="bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white text-3xl font-extrabold py-6 rounded-2xl shadow-md transition-transform active:scale-95 focus:outline-none focus:ring-4 focus:ring-rose-300 flex flex-col items-center justify-center gap-1">
+                        <span>לא</span>
+                    </button>
+                </div>
+
+                <!-- כפתור חזרה לשאלה קודמת לנוחות המטופל -->
+                <div class="pt-2 text-center">
+                    <button id="prev-btn" onclick="goBack()" class="text-slate-500 hover:text-slate-800 text-lg font-bold py-2 px-4 rounded-xl transition-colors">
+                        → חזרה לשאלה הקודמת
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== מסך תוצאה ==================== -->
+        <section id="result-screen" class="hidden flex-col justify-between h-full flex-grow fade-in">
+            <!-- כותרת ואייקונים -->
+            <div class="text-center mb-6">
+                <div id="result-icons" class="flex justify-center items-center gap-6 mb-4">
+                    <!-- האייקונים יוזרקו דינמית לפי סוג התוצאה -->
+                </div>
+                <div id="result-box" class="rounded-3xl p-6 border-2 shadow-sm">
+                    <p id="result-text" class="text-2xl sm:text-3xl font-extrabold leading-relaxed whitespace-pre-line">
+                        <!-- טקסט התוצאה יוזרק כאן -->
+                    </p>
+                </div>
+            </div>
+
+            <!-- דו"ח מענה לשאלון (מוצג בהתאם לכללי התוצאה) -->
+            <div id="report-container" class="w-full my-4">
+                <h3 class="text-xl font-extrabold text-slate-800 mb-3 border-b-2 border-slate-200 pb-2">
+                    פירוט התשובות בחלק זה:
+                </h3>
+                <ul id="report-list" class="space-y-3">
+                    <!-- רשימת השאלות והתשובות תוזרק כאן -->
+                </ul>
+            </div>
+
+            <!-- כפתור מילוי חוזר -->
+            <div class="w-full pt-6 mt-auto">
+                <button onclick="resetQuiz()" class="w-full bg-slate-800 hover:bg-slate-900 active:bg-black text-white text-xl font-bold py-4 px-6 rounded-2xl shadow-md transition-transform active:scale-95 focus:outline-none focus:ring-4 focus:ring-slate-400">
+                    מילוי השאלון מחדש
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // מאגר השאלות המחולק ל-3 חלקים (א, ב, ג) לפי ההנחיות המדויקות
+        const questionsData = [
+            // חלק א' - שאלות 1-7
+            { id: 1, part: 'א', partName: "חלק א'", text: 'האם נאמר לך על ידי רופא "מנוחה במיטה" או "אסור לקום"?' },
+            { id: 2, part: 'א', partName: "חלק א'", text: 'האם נאמר לך שיש שבר לא יציב?' },
+            { id: 3, part: 'א', partName: "חלק א'", text: 'במידה וקיים קוצר נשימה או צורך בחמצן - האם קוצר הנשימה או הצורך בחמצן החמירו בימים/שעות האחרונות?' },
+            { id: 4, part: 'א', partName: "חלק א'", text: 'האם יש כאב חזה פעיל, או שנאמר לך שאובחן אוטם/איסכמיה לאחרונה?' },
+            { id: 5, part: 'א', partName: "חלק א'", text: 'האם יש חום גבוה, בלבול חדש או חולשה קיצונית פתאומית?' },
+            { id: 6, part: 'א', partName: "חלק א'", text: 'האם נאמר לך שיש לך דימום פעיל או ירידה משמעותית בהמוגלובין?' },
+            { id: 7, part: 'א', partName: "חלק א'", text: 'האם את/ה מרגיש/ה חוסר יציבות בעמידה או בהליכה?' },
+
+            // חלק ב' - שאלות 8-13
+            { id: 8, part: 'ב', partName: "חלק ב'", text: 'האם את/ה מסתחרר/ת בקימה מישיבה או שכיבה?' },
+            { id: 9, part: 'ב', partName: "חלק ב'", text: 'האם את/ה מקבל/ת משתנים, תרופות ללחץ דם, תרופות הרדמה או הרגעה, אופיואידים, תרופות שינה או אינסולין?' },
+            { id: 10, part: 'ב', partName: "חלק ב'", text: 'האם יש צורך תכוף בשירותים, אי-שליטה במתן שתן, או שלשול?' },
+            { id: 11, part: 'ב', partName: "חלק ב'", text: 'האם יש עליך צנתר, אינפוזיה, חמצן או נקז שמקשים על התנועה?' },
+            { id: 12, part: 'ב', partName: "חלק ב'", text: 'האם יש עייפות קיצונית, חולשת שרירים או סחרחורת?' },
+            { id: 13, part: 'ב', partName: "חלק ב'", text: 'האם יש בעיית ראייה, בלבול או שכחה?' },
+
+            // חלק ג' - שאלות 14-15
+            { id: 14, part: 'ג', partName: "חלק ג'", text: 'האם את/ה מסוגל/ת לעבור מהמיטה לכיסא ללא עזרה?' },
+            { id: 15, part: 'ג', partName: "חלק ג'", text: 'האם את/ה זקוק/ה למקל, הליכון או אביזר אחר בהליכה?' }
+        ];
+
+        // משתני מצב (State)
+        let currentIndex = 0;
+        let answers = {}; // שמירת התשובות לפי מזהה שאלה: { 1: true, 2: false, ... }
+
+        // אלמנטים מה-DOM
+        const appBody = document.getElementById('app-body');
+        const appContainer = document.getElementById('app-container');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+
+        const partBadge = document.getElementById('part-badge');
+        const questionCounter = document.getElementById('question-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const questionText = document.getElementById('question-text');
+        const prevBtn = document.getElementById('prev-btn');
+
+        const resultIcons = document.getElementById('result-icons');
+        const resultBox = document.getElementById('result-box');
+        const resultText = document.getElementById('result-text');
+        const reportContainer = document.getElementById('report-container');
+        const reportList = document.getElementById('report-list');
+
+        // אייקוני SVG מותאמים אישית
+        const iconsSVG = {
+            nurse: `
+                <div class="flex flex-col items-center bg-white p-3 rounded-2xl shadow-md border border-slate-200">
+                    <svg class="w-14 h-14 text-blue-600" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- כובע אחות -->
+                        <path d="M18 22L22 10H42L46 22H18Z" fill="#EFF6FF" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+                        <path d="M32 13V19M29 16H35" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round"/>
+                        <!-- ראש -->
+                        <circle cx="32" cy="31" r="10" fill="#FEF3C7" stroke="currentColor" stroke-width="3"/>
+                        <!-- גוף ומדים -->
+                        <path d="M14 56C14 46.5 22 41 32 41C42 41 50 46.5 50 56" fill="#DBEAFE" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                        <path d="M27 42L32 49L37 42" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="text-sm font-bold text-slate-700 mt-1">אח/ות</span>
+                </div>
+            `,
+            bell: `
+                <div class="flex flex-col items-center bg-white p-3 rounded-2xl shadow-md border border-slate-200">
+                    <svg class="w-14 h-14 text-amber-500" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- גלי צלצול -->
+                        <path d="M14 22C11 26 11 32 14 36" stroke="#EF4444" stroke-width="3" stroke-linecap="round"/>
+                        <path d="M50 22C53 26 53 32 50 36" stroke="#EF4444" stroke-width="3" stroke-linecap="round"/>
+                        <!-- פעמון -->
+                        <path d="M32 12C23.163 12 16 19.163 16 28V39L11 44V47H53V44L48 39V28C48 19.163 40.837 12 32 12Z" fill="#FEF3C7" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+                        <path d="M27 47C27 49.7614 29.2386 52 32 52C34.7614 52 37 49.7614 37 47" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="32" cy="9" r="3" fill="currentColor"/>
+                    </svg>
+                    <span class="text-sm font-bold text-slate-700 mt-1">פעמון קריאה</span>
+                </div>
+            `,
+            walker: `
+                <div class="flex flex-col items-center bg-white p-3 rounded-2xl shadow-md border border-slate-200">
+                    <svg class="w-14 h-14 text-emerald-700" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- מסגרת הליכון -->
+                        <path d="M18 52V20C18 16.6863 20.6863 14 24 14H40C43.3137 14 46 16.6863 46 20V52" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                        <!-- מוטות חיזוק -->
+                        <path d="M18 30H46" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+                        <path d="M18 40H46" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 4"/>
+                        <!-- ידיות אחיזה -->
+                        <path d="M15 18H23" stroke="#047857" stroke-width="5" stroke-linecap="round"/>
+                        <path d="M41 18H49" stroke="#047857" stroke-width="5" stroke-linecap="round"/>
+                        <!-- גלגלים קדמיים -->
+                        <circle cx="18" cy="54" r="3.5" fill="currentColor"/>
+                        <circle cx="46" cy="54" r="3.5" fill="currentColor"/>
+                    </svg>
+                    <span class="text-sm font-bold text-slate-700 mt-1">הליכון</span>
+                </div>
+            `,
+            cane: `
+                <div class="flex flex-col items-center bg-white p-3 rounded-2xl shadow-md border border-slate-200">
+                    <svg class="w-14 h-14 text-emerald-700" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- מקל הליכה -->
+                        <path d="M38 20C38 14.4772 33.5228 10 28 10C22.4772 10 18 14.4772 18 20V22" stroke="#047857" stroke-width="5" stroke-linecap="round"/>
+                        <path d="M38 20V52" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/>
+                        <!-- גומיית תחתית -->
+                        <path d="M35 54H41" stroke="#1E293B" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                    <span class="text-sm font-bold text-slate-700 mt-1">מקל הליכה</span>
+                </div>
+            `
+        };
+
+        // התחלת השאלון
+        function startQuiz() {
+            currentIndex = 0;
+            answers = {};
+            welcomeScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('flex');
+            resultScreen.classList.add('hidden');
+            resultScreen.classList.remove('flex');
+            
+            quizScreen.classList.remove('hidden');
+            quizScreen.classList.add('flex');
+            renderQuestion();
+        }
+
+        // הצגת השאלה הנוכחית
+        function renderQuestion() {
+            const currentQ = questionsData[currentIndex];
+            
+            // חישוב מספור בתוך החלק הנוכחי
+            const partQuestions = questionsData.filter(q => q.part === currentQ.part);
+            const indexInPart = partQuestions.findIndex(q => q.id === currentQ.id) + 1;
+            const totalInPart = partQuestions.length;
+
+            partBadge.textContent = currentQ.partName;
+            questionCounter.textContent = `שאלה ${indexInPart} מתוך ${totalInPart}`;
+            
+            // עדכון פס התקדמות
+            const progressPercent = (indexInPart / totalInPart) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+
+            // עדכון טקסט השאלה עם אנימציה קלה
+            questionText.parentElement.classList.remove('fade-in');
+            void questionText.parentElement.offsetWidth; // הפעלת reflow לאנימציה
+            questionText.parentElement.classList.add('fade-in');
+            questionText.textContent = currentQ.text;
+
+            // הסתרת כפתור "חזרה" בשאלה הראשונה
+            if (currentIndex === 0) {
+                prevBtn.style.visibility = 'hidden';
+            } else {
+                prevBtn.style.visibility = 'visible';
+            }
+        }
+
+        // חזרה לשאלה הקודמת
+        function goBack() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        // טיפול בלחיצה על כן / לא
+        function handleAnswer(isYes) {
+            const currentQ = questionsData[currentIndex];
+            answers[currentQ.id] = isYes;
+
+            // בדיקה האם הגענו לסוף חלק א' (שאלה 7)
+            if (currentQ.id === 7) {
+                const partAIds = [1, 2, 3, 4, 5, 6, 7];
+                const hasYesInPartA = partAIds.some(id => answers[id] === true);
+                
+                if (hasYesInPartA) {
+                    // עצור והצג מסך תוצאה אדום
+                    showResult('RED', partAIds);
+                    return;
+                } else {
+                    // המשך לחלק ב'
+                    currentIndex++;
+                    renderQuestion();
+                    return;
+                }
+            }
+
+            // בדיקה האם הגענו לסוף חלק ב' (שאלה 13)
+            if (currentQ.id === 13) {
+                const partBIds = [8, 9, 10, 11, 12, 13];
+                const hasYesInPartB = partBIds.some(id => answers[id] === true);
+                
+                if (hasYesInPartB) {
+                    // עצור והצג מסך תוצאה צהוב
+                    showResult('YELLOW', partBIds);
+                    return;
+                } else {
+                    // המשך לחלק ג'
+                    currentIndex++;
+                    renderQuestion();
+                    return;
+                }
+            }
+
+            // בדיקה האם הגענו לסוף חלק ג' (שאלה 15)
+            if (currentQ.id === 15) {
+                const partCIds = [14, 15];
+                const q14 = answers[14]; // האם מסוגל לעבור מהמיטה לכיסא ללא עזרה?
+                const q15 = answers[15]; // האם זקוק למקל/הליכון/אביזר?
+
+                // תנאי 1: השיב "לא" לשאלה 14 או "כן" לשאלה 15 -> ירוק עם אביזר
+                if (q14 === false || q15 === true) {
+                    showResult('GREEN_DEVICE', partCIds);
+                } 
+                // תנאי 2: השיב "כן" לשאלה 14 וגם "לא" לשאלה 15 -> ירוק ללא אביזר
+                else if (q14 === true && q15 === false) {
+                    showResult('GREEN_NO_DEVICE', partCIds);
+                }
+                return;
+            }
+
+            // מעבר לשאלה הבאה בתוך אותו חלק
+            currentIndex++;
+            renderQuestion();
+        }
+
+        // הצגת מסך התוצאה המתאים
+        function showResult(type, questionIdsToShow) {
+            quizScreen.classList.add('hidden');
+            quizScreen.classList.remove('flex');
+            resultScreen.classList.remove('hidden');
+            resultScreen.classList.add('flex');
+
+            // איפוס סגנונות קודמים
+            appBody.className = 'min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-500';
+            resultIcons.innerHTML = '';
+            reportList.innerHTML = '';
+
+            if (type === 'RED') {
+                // מסך תוצאה אדום
+                appBody.classList.add('bg-red-100', 'text-red-950');
+                appContainer.classList.add('border-red-300');
+                resultBox.className = 'rounded-3xl p-6 border-2 border-red-300 bg-red-50 text-red-900 shadow-sm';
+                resultIcons.innerHTML = iconsSVG.nurse + iconsSVG.bell;
+                resultText.textContent = `אור אדום – אנא הימנע/י מקימה מהמיטה, צלצל/י בפעמון הקריאה הסמוך למיטתך וחכה/י עד לבדיקת איש צוות\nהראה/י לו/ה בבקשה את דו"ח המענה לשאלון שבעמוד זה`;
+                
+                // בניית דו"ח חלק א': "כן" ברקע אדום עדין, "לא" ברקע ירוק עדין
+                buildReport(questionIdsToShow, (qId, ans) => ans === true ? 'RED' : 'GREEN');
+            } 
+            else if (type === 'YELLOW') {
+                // מסך תוצאה צהוב
+                appBody.classList.add('bg-amber-100', 'text-amber-950');
+                appContainer.classList.add('border-amber-300');
+                resultBox.className = 'rounded-3xl p-6 border-2 border-amber-300 bg-amber-50 text-amber-900 shadow-sm';
+                resultIcons.innerHTML = iconsSVG.nurse + iconsSVG.bell;
+                resultText.textContent = `אור צהוב - קימה בליווי והשגחה של איש צוות או משפחה\nאנא הימנע/י מקימה מהמיטה ללא סיוע והשגחה, צלצל/י בפעמון הקריאה הסמוך למיטתך וחכה/י עד לבדיקת איש צוות\nהראה/י לו/ה בבקשה את דו"ח המענה לשאלון שבעמוד זה`;
+                
+                // בניית דו"ח חלק ב': "כן" ברקע אדום עדין, "לא" ברקע ירוק עדין
+                buildReport(questionIdsToShow, (qId, ans) => ans === true ? 'RED' : 'GREEN');
+            } 
+            else if (type === 'GREEN_DEVICE') {
+                // מסך תוצאה ירוק עם אביזר
+                appBody.classList.add('bg-emerald-100', 'text-emerald-950');
+                appContainer.classList.add('border-emerald-300');
+                resultBox.className = 'rounded-3xl p-6 border-2 border-emerald-300 bg-emerald-50 text-emerald-900 shadow-sm';
+                resultIcons.innerHTML = iconsSVG.walker + iconsSVG.cane;
+                resultText.textContent = `אור ירוק – ניתן להתנייד באופן עצמאי באמצעות שימוש באביזר עזר להליכה\nצא/י לסיבוב קצר עם אביזר הליכה המתאים לך או עבור/עברי לישיבה על כיסא על מנת לזרז החלמה ולשמור על העצמאות שלך`;
+                
+                // בניית דו"ח חלק ג':
+                // שאלה 14: "לא" -> אדום, "כן" -> ירוק
+                // שאלה 15: "כן" -> אדום, "לא" -> ירוק
+                buildReport(questionIdsToShow, (qId, ans) => {
+                    if (qId === 14) return ans === false ? 'RED' : 'GREEN';
+                    if (qId === 15) return ans === true ? 'RED' : 'GREEN';
+                    return 'GREEN';
+                });
+            } 
+            else if (type === 'GREEN_NO_DEVICE') {
+                // מסך תוצאה ירוק ללא אביזר
+                appBody.classList.add('bg-emerald-100', 'text-emerald-950');
+                appContainer.classList.add('border-emerald-300');
+                resultBox.className = 'rounded-3xl p-6 border-2 border-emerald-300 bg-emerald-50 text-emerald-900 shadow-sm';
+                resultText.textContent = `אור ירוק – ניתן להתנייד באופן עצמאי\nצא/י לסיבוב קצר על מנת לזרז החלמה ולשמור על העצמאות שלך`;
+                
+                // בניית דו"ח חלק ג':
+                // שאלה 14: "לא" -> אדום, "כן" -> ירוק
+                // שאלה 15: "כן" -> אדום, "לא" -> ירוק
+                buildReport(questionIdsToShow, (qId, ans) => {
+                    if (qId === 14) return ans === false ? 'RED' : 'GREEN';
+                    if (qId === 15) return ans === true ? 'RED' : 'GREEN';
+                    return 'GREEN';
+                });
+            }
+
+            // גלילה לראש הדף כדי שהמטופל יראה מיד את התוצאה
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // פונקציה לבניית רשימת השאלות והתשובות בדו"ח
+        function buildReport(questionIds, colorResolver) {
+            questionIds.forEach(id => {
+                const qObj = questionsData.find(q => q.id === id);
+                const userAns = answers[id];
+                const ansText = userAns ? 'כן' : 'לא';
+                const rowColor = colorResolver(id, userAns);
+
+                const li = document.createElement('li');
+                
+                // עיצוב רקע אדום עדין ובהיר או ירוק עדין ובהיר לפי התנאים
+                if (rowColor === 'RED') {
+                    li.className = 'p-4 rounded-2xl bg-red-100/90 border border-red-300 text-red-950 flex justify-between items-center gap-3 shadow-xs';
+                } else {
+                    li.className = 'p-4 rounded-2xl bg-emerald-100/90 border border-emerald-300 text-emerald-950 flex justify-between items-center gap-3 shadow-xs';
+                }
+
+                const badgeClass = rowColor === 'RED' 
+                    ? 'bg-red-600 text-white' 
+                    : 'bg-emerald-600 text-white';
+
+                li.innerHTML = `
+                    <span class="text-lg font-medium leading-snug flex-1">${qObj.text}</span>
+                    <span class="${badgeClass} text-lg font-extrabold px-4 py-1.5 rounded-xl shrink-0">
+                        ${ansText}
+                    </span>
+                `;
+                reportList.appendChild(li);
+            });
+        }
+
+        // איפוס השאלון וחזרה למסך הפתיחה
+        function resetQuiz() {
+            currentIndex = 0;
+            answers = {};
+            appBody.className = 'bg-slate-100 text-slate-900 min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-500';
+            appContainer.classList.remove('border-red-300', 'border-amber-300', 'border-emerald-300');
+            appContainer.classList.add('border-slate-200');
+
+            resultScreen.classList.add('hidden');
+            resultScreen.classList.remove('flex');
+            welcomeScreen.classList.remove('hidden');
+            welcomeScreen.classList.add('flex');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
